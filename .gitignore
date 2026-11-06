@@ -1,0 +1,8 @@
+.env
+*.pem
+*.key
+*.tfstate*
+.terraform/
+node_modules/
+target/
+*.log
