@@ -14,3 +14,4 @@ output "tunnels" {
     ssh -i labsuser.pem -L 30443:localhost:30443 ubuntu@${aws_eip.master.public_ip}
   EOT
 }
+output "data_volume_id" { value = aws_ebs_volume.ci_data.id }
