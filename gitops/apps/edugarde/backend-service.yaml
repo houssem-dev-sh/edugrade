@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: edugrade
+spec:
+  type: ClusterIP
+  selector:
+    app: edugrade
+    component: backend
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
