@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: edugrade
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edugrade
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: edugrade
+        component: backend
+    spec:
+      containers:
+        - name: backend
+          image: docker.io/houssem26102001/student-backend:32
+          ports:
+            - name: http
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

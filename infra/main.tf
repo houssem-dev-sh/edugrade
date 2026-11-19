@@ -74,6 +74,10 @@ resource "aws_instance" "master" {
   }
 
   tags = { Name = "edugrade-k3s-master", Project = "EduGrade", Role = "k3s-master" }
+
+  lifecycle {
+    ignore_changes = [ami]
+  }
 }
 
 # --- k3s WORKER(s) ---
@@ -94,6 +98,10 @@ resource "aws_instance" "worker" {
   }
 
   tags = { Name = "edugrade-k3s-worker-${count.index + 1}", Project = "EduGrade", Role = "k3s-worker" }
+
+  lifecycle {
+    ignore_changes = [ami]
+  }
 }
 
 # IP fixes (sinon l'IP publique change à chaque arrêt/démarrage)
@@ -106,4 +114,24 @@ resource "aws_eip" "worker" {
   count    = var.worker_count
   instance = aws_instance.worker[count.index].id
   domain   = "vpc"
+}
+
+# --- Disque de données PERSISTANT (Jenkins + SonarQube) ---
+resource "aws_ebs_volume" "ci_data" {
+  availability_zone = aws_instance.worker[0].availability_zone
+  size              = 20
+  type              = "gp3"
+
+  tags = { Name = "edugrade-ci-data", Project = "EduGrade" }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "aws_volume_attachment" "ci_data" {
+  device_name                    = "/dev/sdf"
+  volume_id                      = aws_ebs_volume.ci_data.id
+  instance_id                    = aws_instance.worker[0].id
+  stop_instance_before_detaching = true
 }

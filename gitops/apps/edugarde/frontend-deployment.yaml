@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: edugrade
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edugrade
+      component: frontend
+  template:
+    metadata:
+      labels:
+        app: edugrade
+        component: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: docker.io/houssem26102001/student-frontend:32
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
