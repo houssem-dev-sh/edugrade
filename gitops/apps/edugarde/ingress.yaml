@@ -9,6 +9,14 @@ spec:
     - host: edugrade.52.200.66.150.nip.io
       http:
         paths:
+          - path: /student
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8080
+
           - path: /
             pathType: Prefix
             backend:
