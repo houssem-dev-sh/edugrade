@@ -4,7 +4,7 @@ metadata:
   name: edugrade
   namespace: edugrade
 spec:
-  ingressClassName: nginx
+  ingressClassName: traefik
   rules:
     - host: edugrade.52.200.66.150.nip.io
       http:
