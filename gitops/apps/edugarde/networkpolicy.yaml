@@ -41,6 +41,14 @@ spec:
         - protocol: TCP
           port: 443
 
+    # SMTP Gmail
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 587
+
     # Connexion vers MariaDB dans le namespace edugrade
     - to:
         - podSelector:
