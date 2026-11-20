@@ -6,8 +6,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: edugrade.52.200.66.150.nip.io
-      http:
+    - http:
         paths:
           - path: /student
             pathType: Prefix
