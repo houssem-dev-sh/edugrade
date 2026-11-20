@@ -22,6 +22,7 @@ spec:
           port: 8080
 
   egress:
+    # DNS
     - to:
         - namespaceSelector: {}
       ports:
@@ -30,9 +31,19 @@ spec:
         - protocol: UDP
           port: 53
 
+    # HTTPS
     - to:
         - ipBlock:
             cidr: 0.0.0.0/0
       ports:
         - protocol: TCP
           port: 443
+
+    # Connexion vers MariaDB dans le namespace edugrade
+    - to:
+        - podSelector:
+            matchLabels:
+              app: mariadb
+      ports:
+        - protocol: TCP
+          port: 3306
