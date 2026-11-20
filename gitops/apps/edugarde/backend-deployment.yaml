@@ -22,6 +22,8 @@ spec:
             - name: http
               containerPort: 8080
           env:
+            - name: SERVER_PORT
+              value: "8080"
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mariadb://mariadb:3306/edugrade?useSSL=false&serverTimezone=UTC
             - name: SPRING_DATASOURCE_USERNAME
