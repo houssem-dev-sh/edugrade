@@ -44,14 +44,26 @@ resource "aws_security_group" "edugrade" {
     self        = true
   }
 
+  ingress {
+    description = "Traefik NodePort depuis Tailscale"
+    from_port   = 30080
+    to_port     = 30080
+    protocol    = "tcp"
+    cidr_blocks = ["100.68.137.75/32"]
+  }
+
   egress {
+    description = "Tout le trafic sortant"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = { Name = "edugrade-sg", Project = "EduGrade" }
+  tags = {
+    Name    = "edugrade-sg"
+    Project = "EduGrade"
+  }
 }
 
 locals {
