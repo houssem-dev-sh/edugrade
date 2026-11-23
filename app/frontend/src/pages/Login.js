@@ -1,244 +1,251 @@
-import React, { useState } from 'react';
-import {
-  Box, Card, CardContent, TextField, Button,
-  Typography, Alert, CircularProgress, InputAdornment
-} from '@mui/material';
-import { Email, Lock, Security } from '@mui/icons-material';
-import axios from 'axios';
+import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import MailOutlined from '@mui/icons-material/MailOutlined';
+import MarkEmailReadOutlined from '@mui/icons-material/MarkEmailReadOutlined';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import TextField, { FieldMessage } from '../components/ui/TextField';
+import PasswordField from '../components/auth/PasswordField';
+import OtpInput from '../components/auth/OtpInput';
+import Alert from '../components/ui/Alert';
+import SubmitButton from '../components/auth/SubmitButton';
+import * as authApi from '../auth/api';
+import { saveSession } from '../auth/session';
+import { validateEmail } from '../auth/validation';
+import { useCooldown } from '../auth/hooks';
+import useDocumentTitle from '../hooks/useDocumentTitle';
+import useForm from '../hooks/useForm';
+import { CODE_TTL_MINUTES, OTP_LENGTH, RESEND_COOLDOWN } from '../auth/config';
+
+const validators = {
+  email: validateEmail,
+  password: (v) => (v ? '' : 'Enter your password.'),
+};
 
 const Login = () => {
-  // État de l'étape (1 = login, 2 = OTP)
+  const location = useLocation();
+  const prefilledEmail = location.state?.email || '';
+  const notice = location.state?.notice || '';
+
+  // Step 1 = credentials, step 2 = one-time code sent by email
   const [step, setStep] = useState(1);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { values, bind, validateAll } = useForm(
+    { email: prefilledEmail, password: '' },
+    validators,
+  );
+  const [remember, setRemember] = useState(true);
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [info, setInfo] = useState('');
+  const [cooldown, startCooldown] = useCooldown();
 
-  // ===== ÉTAPE 1 : Envoyer email + password =====
+  const email = values.email.trim();
+
+  useDocumentTitle(step === 1 ? 'Sign in' : 'Verify your sign-in');
+
+  // ===== Step 1: email + password → the backend emails a 6-digit code =====
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+    if (!validateAll(e.currentTarget)) return;
 
+    setLoading(true);
     try {
-      const response = await axios.post(
-        '/student/api/auth/login',
-        { email, password }
-      );
-
-      if (response.data.success) {
-        setSuccess(response.data.message);
-        setStep(2); // Passer à l'étape OTP
+      const data = await authApi.login(email, values.password);
+      if (data.success) {
+        setOtp('');
+        setInfo('');
+        setStep(2);
+        startCooldown(RESEND_COOLDOWN);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Erreur de connexion');
+      setError(authApi.toFriendlyError(err, 'Unable to sign in right now. Please try again.'));
     } finally {
       setLoading(false);
     }
   };
 
-  // ===== ÉTAPE 2 : Vérifier OTP =====
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  // ===== Step 2: verify the code → JWT =====
+  const verify = async (code) => {
+    if (loading) return;
+    if (code.length !== OTP_LENGTH) {
+      setError(`Enter the ${OTP_LENGTH}-digit code from your email.`);
+      return;
+    }
+
     setError('');
-
+    setInfo('');
+    setLoading(true);
     try {
-      const response = await axios.post(
-        '/student/api/auth/verify-otp',
-        { email, otp }
-      );
-
-      if (response.data.success) {
-        // Sauvegarder le token JWT
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('email', email);
-        // Rediriger vers le dashboard
+      const data = await authApi.verifyOtp(email, code);
+      if (data.success) {
+        saveSession(data.token, email, remember);
         window.location.href = '/dashboard';
+        return; // keep the loading state while the browser navigates
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Code OTP invalide');
-    } finally {
-      setLoading(false);
+      setError(authApi.toFriendlyError(err, 'That code is invalid or has expired.'));
+      setOtp('');
+    }
+    setLoading(false);
+  };
+
+  const resendCode = async () => {
+    if (cooldown > 0 || loading) return;
+    setError('');
+    setInfo('');
+    try {
+      await authApi.login(email, values.password);
+      setOtp('');
+      setInfo(`We sent a new code to ${email}.`);
+      startCooldown(RESEND_COOLDOWN);
+    } catch (err) {
+      setError(authApi.toFriendlyError(err));
     }
   };
+
+  const backToCredentials = () => {
+    setStep(1);
+    setOtp('');
+    setError('');
+    setInfo('');
+  };
+
+  if (step === 2) {
+    return (
+      <section className="af-page" key="verify">
+        <div className="af-badge-icon">
+          <MarkEmailReadOutlined fontSize="inherit" />
+        </div>
+
+        <header className="af-head">
+          <h1 className="af-title">Check your email</h1>
+          <p className="af-subtitle">
+            We sent a {OTP_LENGTH}-digit code to <strong>{email}</strong>. Enter it below to
+            finish signing in.
+          </p>
+        </header>
+
+        <form
+          className="af-form"
+          noValidate
+          onSubmit={(e) => {
+            e.preventDefault();
+            verify(otp);
+          }}
+        >
+          {error && <Alert tone="error">{error}</Alert>}
+          {info && <Alert tone="info">{info}</Alert>}
+
+          <div className="af-field">
+            <label htmlFor="login-otp" className="af-label">
+              Verification code
+            </label>
+            <OtpInput
+              id="login-otp"
+              name="otp"
+              value={otp}
+              onChange={(code) => {
+                setOtp(code);
+                if (error) setError('');
+              }}
+              onComplete={verify}
+              invalid={Boolean(error)}
+              readOnly={loading}
+              autoFocus
+              describedBy="login-otp-hint"
+            />
+            <FieldMessage id="login-otp-hint" hint={`The code expires in ${CODE_TTL_MINUTES} minutes.`} />
+          </div>
+
+          <SubmitButton
+            loading={loading}
+            loadingText="Verifying…"
+            disabled={otp.length !== OTP_LENGTH}
+          >
+            Verify and continue
+          </SubmitButton>
+        </form>
+
+        <div className="af-foot">
+          <p>
+            Didn't get the code?{' '}
+            <button
+              type="button"
+              className="af-link af-link-btn"
+              onClick={resendCode}
+              disabled={cooldown > 0}
+            >
+              {cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend code'}
+            </button>
+          </p>
+          <button type="button" className="af-back" onClick={backToCredentials}>
+            <span className="af-back-icon" aria-hidden="true">
+              <ArrowBack fontSize="inherit" />
+            </span>
+            Use a different account
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <Box sx={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'linear-gradient(135deg, #1f497d 0%, #4682b4 100%)'
-    }}>
-      <Card sx={{ width: 420, borderRadius: 3, boxShadow: 10 }}>
-        <CardContent sx={{ p: 4 }}>
+    <section className="af-page" key="credentials">
+      <header className="af-head">
+        <h1 className="af-title">Welcome back</h1>
+        <p className="af-subtitle">Sign in to continue where you left off.</p>
+      </header>
 
-          {/* Logo */}
-          <Box sx={{ textAlign: 'center', mb: 3 }}>
-            <Security sx={{ fontSize: 60, color: '#1f497d' }} />
-            <Typography variant="h4" fontWeight="bold" color="#1f497d">
-              StudentOps
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {step === 1
-                ? 'Connectez-vous à votre compte'
-                : 'Vérification en deux étapes'}
-            </Typography>
-          </Box>
+      <form className="af-form" noValidate onSubmit={handleLogin}>
+        {error && <Alert tone="error">{error}</Alert>}
+        {!error && notice && <Alert tone="success">{notice}</Alert>}
 
-          {/* Indicateur d'étape */}
-          <Box sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            mb: 3,
-            gap: 1
-          }}>
-            <Box sx={{
-              width: 40, height: 6, borderRadius: 3,
-              bgcolor: step >= 1 ? '#1f497d' : '#ddd'
-            }} />
-            <Box sx={{
-              width: 40, height: 6, borderRadius: 3,
-              bgcolor: step >= 2 ? '#1f497d' : '#ddd'
-            }} />
-          </Box>
+        <TextField
+          label="Email"
+          icon={MailOutlined}
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          placeholder="you@school.edu"
+          autoFocus={!prefilledEmail}
+          {...bind('email')}
+        />
 
-          {/* Alertes */}
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
-          )}
-          {success && (
-            <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>
-          )}
+        <PasswordField
+          label="Password"
+          autoComplete="current-password"
+          placeholder="Enter your password"
+          autoFocus={Boolean(prefilledEmail)}
+          {...bind('password')}
+        />
 
-          {/* ===== FORMULAIRE ÉTAPE 1 ===== */}
-          {step === 1 && (
-            <form onSubmit={handleLogin}>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-                Étape 1 — Identifiants
-              </Typography>
+        <div className="af-row-between">
+          <label className="af-check">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+            />
+            <span>Remember me</span>
+          </label>
+          <Link to="/forgot-password" state={{ email }} className="af-link af-small">
+            Forgot password?
+          </Link>
+        </div>
 
-              <TextField
-                fullWidth
-                label="Email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                sx={{ mb: 2 }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Email color="action" />
-                    </InputAdornment>
-                  )
-                }}
-              />
+        <SubmitButton loading={loading} loadingText="Signing in…">
+          Sign in
+        </SubmitButton>
+      </form>
 
-              <TextField
-                fullWidth
-                label="Mot de passe"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                sx={{ mb: 3 }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Lock color="action" />
-                    </InputAdornment>
-                  )
-                }}
-              />
-
-              <Button
-                fullWidth
-                type="submit"
-                variant="contained"
-                size="large"
-                disabled={loading}
-                sx={{
-                  bgcolor: '#1f497d',
-                  py: 1.5,
-                  fontSize: '1rem'
-                }}
-              >
-                {loading
-                  ? <CircularProgress size={24} color="inherit" />
-                  : 'Continuer →'}
-              </Button>
-            </form>
-          )}
-
-          {/* ===== FORMULAIRE ÉTAPE 2 (OTP) ===== */}
-          {step === 2 && (
-            <form onSubmit={handleVerifyOtp}>
-              <Typography variant="h6" sx={{ mb: 1 }}>
-                Étape 2 — Code de vérification
-              </Typography>
-
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Un code à 6 chiffres a été envoyé sur :
-                <strong> {email}</strong>
-              </Typography>
-
-              <TextField
-                fullWidth
-                label="Code OTP (6 chiffres)"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                required
-                inputProps={{
-                  maxLength: 6,
-                  style: {
-                    textAlign: 'center',
-                    fontSize: '2rem',
-                    letterSpacing: '0.5rem'
-                  }
-                }}
-                sx={{ mb: 3 }}
-              />
-
-              <Button
-                fullWidth
-                type="submit"
-                variant="contained"
-                size="large"
-                disabled={loading}
-                sx={{
-                  bgcolor: '#1f497d',
-                  py: 1.5,
-                  fontSize: '1rem',
-                  mb: 2
-                }}
-              >
-                {loading
-                  ? <CircularProgress size={24} color="inherit" />
-                  : '✅ Vérifier et accéder'}
-              </Button>
-
-              <Button
-                fullWidth
-                variant="text"
-                onClick={() => {
-                  setStep(1);
-                  setOtp('');
-                  setError('');
-                  setSuccess('');
-                }}
-              >
-                ← Retour
-              </Button>
-            </form>
-          )}
-
-        </CardContent>
-      </Card>
-    </Box>
+      <p className="af-alt">
+        Don't have an account?{' '}
+        <Link to="/register" className="af-link">
+          Sign up
+        </Link>
+      </p>
+    </section>
   );
 };
 

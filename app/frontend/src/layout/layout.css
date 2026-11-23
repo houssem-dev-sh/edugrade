@@ -1,0 +1,401 @@
+/* =====================================================================
+   EduGrade — app shell
+   Navy sidebar + light content canvas. The sidebar wears the same surface
+   as the showcase panel of the sign-in pages (deep navy, indigo glow, fine
+   grid, 22px corners), so the app reads as the same product once you are in.
+
+   Below 1024px the sidebar turns into a slide-in menu opened from a top bar.
+   ===================================================================== */
+
+.app {
+  --app-gap: 12px;
+  --app-sidebar-w: 248px;
+
+  min-height: 100vh;
+  min-height: 100dvh;
+  background:
+    radial-gradient(1100px 420px at 78% -180px, rgba(99, 102, 241, 0.1), transparent 70%),
+    var(--af-canvas);
+}
+
+.app-skip {
+  position: absolute;
+  top: -64px;
+  left: 16px;
+  z-index: 100;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  background: var(--af-brand);
+  border-radius: var(--af-radius);
+  box-shadow: var(--af-shadow-lg);
+  transition: top 0.15s ease;
+}
+
+.app-skip:focus {
+  top: 16px;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------
+   Sidebar
+   --------------------------------------------------------------------- */
+
+.app-sidebar {
+  position: fixed;
+  top: var(--app-gap);
+  bottom: var(--app-gap);
+  left: var(--app-gap);
+  z-index: 40;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  width: var(--app-sidebar-w);
+  padding: 18px 14px 14px;
+  overflow: hidden;
+  color: #fff;
+  border-radius: var(--af-radius-xl);
+  background:
+    radial-gradient(420px 320px at 100% 0%, rgba(99, 102, 241, 0.34), transparent 64%),
+    radial-gradient(380px 300px at 0% 100%, rgba(14, 165, 233, 0.16), transparent 62%),
+    linear-gradient(165deg, var(--af-navy-1) 0%, var(--af-navy-2) 52%, var(--af-navy-3) 100%);
+  box-shadow: 0 24px 48px -28px rgba(10, 18, 51, 0.6);
+}
+
+/* Fine grid that fades out, as on the sign-in panel */
+.app-sidebar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(ellipse at 78% 14%, #000 12%, transparent 70%);
+  mask-image: radial-gradient(ellipse at 78% 14%, #000 12%, transparent 70%);
+}
+
+/* Soft indigo glow in the top corner */
+.app-sidebar::after {
+  content: '';
+  position: absolute;
+  top: -110px;
+  right: -120px;
+  z-index: -1;
+  width: 260px;
+  height: 260px;
+  background: #6366f1;
+  border-radius: 50%;
+  opacity: 0.4;
+  filter: blur(70px);
+}
+
+.app-sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 6px;
+}
+
+.app-sidebar-close {
+  display: none;
+  color: var(--af-on-navy);
+}
+
+.app-sidebar-close:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.app-sidebar-close:focus-visible {
+  outline-color: #a5b4fc;
+}
+
+.app-nav {
+  flex: 1;
+  min-height: 0;
+  margin-top: 30px;
+  overflow-y: auto;
+}
+
+.app-nav-label {
+  margin: 0 0 8px;
+  padding: 0 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--af-on-navy-faint);
+}
+
+.app-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 550;
+  color: var(--af-on-navy);
+  text-align: left;
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  border-radius: var(--af-radius);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.app-nav-item:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.app-nav-item:focus-visible {
+  outline: 2px solid #a5b4fc;
+  outline-offset: 2px;
+}
+
+.app-nav-item.is-active {
+  color: #fff;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.07));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.app-nav-icon {
+  display: flex;
+  flex-shrink: 0;
+  font-size: 20px;
+  color: rgba(199, 205, 254, 0.72);
+  transition: color 0.15s ease;
+}
+
+.app-nav-item:hover .app-nav-icon {
+  color: #e0e7ff;
+}
+
+.app-nav-item.is-active .app-nav-icon {
+  color: #a5b4fc;
+}
+
+.app-sidebar-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+}
+
+/* Signed-in user: a glass card like the ones on the sign-in panel */
+.app-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04));
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.app-user-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.app-user-name,
+.app-user-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-user-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.app-user-email {
+  font-size: 12px;
+  color: var(--af-on-navy-faint);
+}
+
+/* ---------------------------------------------------------------------
+   Content area
+   --------------------------------------------------------------------- */
+
+.app-main {
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin-left: calc(var(--app-sidebar-w) + var(--app-gap) * 2);
+  outline: none;
+}
+
+.app-content {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 36px 36px 56px;
+}
+
+/* Page sections ease in one after the other, as the sign-in forms do */
+.app-content > * {
+  animation: af-rise 0.5s var(--af-ease) both;
+}
+.app-content > *:nth-child(2) { animation-delay: 60ms; }
+.app-content > *:nth-child(3) { animation-delay: 120ms; }
+.app-content > *:nth-child(4) { animation-delay: 180ms; }
+
+.app-page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+  margin-bottom: 28px;
+}
+
+.app-page-heading {
+  min-width: 0;
+}
+
+.app-page-title {
+  margin: 0 0 6px;
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 650;
+  letter-spacing: -0.028em;
+  color: var(--af-ink);
+  text-wrap: balance;
+}
+
+.app-page-sub {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--af-muted);
+  text-wrap: pretty;
+}
+
+.app-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* ---------------------------------------------------------------------
+   Top bar & slide-in menu (tablet, mobile)
+   --------------------------------------------------------------------- */
+
+.app-topbar,
+.app-backdrop {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .app-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 60px;
+    padding: 0 24px;
+    background: rgba(255, 255, 255, 0.86);
+    border-bottom: 1px solid var(--af-line);
+    -webkit-backdrop-filter: saturate(1.4) blur(14px);
+    backdrop-filter: saturate(1.4) blur(14px);
+  }
+
+  .app-main {
+    min-height: calc(100vh - 60px);
+    min-height: calc(100dvh - 60px);
+    margin-left: 0;
+  }
+
+  .app-content {
+    padding: 28px 24px 48px;
+  }
+
+  .app-sidebar {
+    width: min(300px, calc(100vw - 64px));
+    visibility: hidden;
+    box-shadow: 0 32px 64px -16px rgba(2, 6, 23, 0.6);
+    transform: translateX(calc(-100% - 24px));
+    transition: transform 0.3s var(--af-ease), visibility 0s linear 0.3s;
+  }
+
+  .app-sidebar.is-open {
+    visibility: visible;
+    transform: none;
+    transition: transform 0.3s var(--af-ease), visibility 0s;
+  }
+
+  .app-sidebar-close {
+    display: grid;
+  }
+
+  .app-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    display: block;
+    background: var(--af-scrim);
+    opacity: 0;
+    pointer-events: none;
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    transition: opacity 0.25s ease;
+  }
+
+  .app-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* Phones: the page's main button spans the full width, under the title */
+@media (max-width: 560px) {
+  .app-page-actions,
+  .app-page-actions .af-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-topbar {
+    padding: 0 16px;
+  }
+
+  .app-content {
+    padding: 22px 16px 40px;
+  }
+
+  .app-page-head {
+    margin-bottom: 22px;
+  }
+
+  .app-page-title {
+    font-size: 24px;
+  }
+}

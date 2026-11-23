@@ -1,0 +1,1215 @@
+/* =====================================================================
+   EduGrade — UI primitives
+   Building blocks shared by every screen: brand mark, fields, buttons,
+   alerts, cards, tables, dialogs, toasts. Class prefix: af- (app foundation).
+
+   Screen-specific layout lives next to its component:
+     components/auth/auth.css   sign-in pages
+     layout/layout.css          app shell (sidebar, top bar, page header)
+     pages/dashboard.css        dashboard
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   Accessibility & motion
+   --------------------------------------------------------------------- */
+
+.af-visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes af-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes af-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes af-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes af-shimmer {
+  from {
+    background-position: 100% 50%;
+  }
+  to {
+    background-position: 0 50%;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Brand mark
+   --------------------------------------------------------------------- */
+
+.af-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--af-ink);
+  text-decoration: none;
+  border-radius: 10px;
+}
+
+.af-brand:focus-visible {
+  outline: 2px solid var(--af-brand);
+  outline-offset: 4px;
+}
+
+.af-brand-logo {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  font-size: 20px;
+  color: #fff;
+  background: linear-gradient(140deg, #6d66f6 0%, #4338ca 55%, #1e1b4b 100%);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.af-brand-name {
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+/* On the navy surface */
+.af-brand.is-on-dark {
+  color: #fff;
+}
+
+.af-brand.is-on-dark:focus-visible {
+  outline-color: #a5b4fc;
+}
+
+.af-brand.is-on-dark .af-brand-logo {
+  background: linear-gradient(140deg, #8b85ff 0%, #5b54f0 55%, #3730a3 100%);
+  box-shadow: 0 6px 16px -6px rgba(99, 102, 241, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.32);
+}
+
+/* ---------------------------------------------------------------------
+   Icon badge (tinted square that carries an icon)
+   --------------------------------------------------------------------- */
+
+.af-badge-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  font-size: 24px;
+  color: var(--af-brand);
+  background: linear-gradient(180deg, #f4f5ff 0%, #e8eaff 100%);
+  border: 1px solid var(--af-brand-line);
+  box-shadow: var(--af-shadow-xs), inset 0 1px 0 #fff;
+}
+
+.af-badge-icon.is-sm {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  font-size: 21px;
+}
+
+.af-badge-icon.is-success {
+  color: var(--af-success);
+  background: linear-gradient(180deg, #f1fdf6 0%, #dcfae8 100%);
+  border-color: #c4f1d6;
+}
+
+.af-badge-icon.is-danger {
+  color: var(--af-danger);
+  background: linear-gradient(180deg, #fff6f5 0%, #fee4e2 100%);
+  border-color: var(--af-danger-line);
+}
+
+.af-badge-icon.is-neutral {
+  color: var(--af-muted);
+  background: linear-gradient(180deg, #fbfcfe 0%, #f0f2f7 100%);
+  border-color: var(--af-line);
+}
+
+/* ---------------------------------------------------------------------
+   Forms
+   --------------------------------------------------------------------- */
+
+.af-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.af-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.af-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.af-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.af-label {
+  font-size: 13.5px;
+  font-weight: 550;
+  color: var(--af-ink-2);
+}
+
+.af-label-aside {
+  font-size: 12.5px;
+  color: var(--af-faint);
+}
+
+.af-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.af-control-icon {
+  position: absolute;
+  left: 13px;
+  display: flex;
+  font-size: 18px;
+  color: var(--af-faint);
+  pointer-events: none;
+  transition: color 0.15s ease;
+}
+
+.af-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--af-ink);
+  background: #fff;
+  border: 1px solid var(--af-line-strong);
+  border-radius: var(--af-radius);
+  box-shadow: var(--af-shadow-xs);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.af-input.is-compact {
+  height: 40px;
+  font-size: 14px;
+}
+
+.af-input.has-icon {
+  padding-left: 40px;
+}
+
+.af-input.has-end {
+  padding-right: 46px;
+}
+
+.af-input::placeholder {
+  color: var(--af-placeholder);
+}
+
+/* The search field draws its own clear button */
+.af-input[type='search']::-webkit-search-cancel-button,
+.af-input[type='search']::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.af-input:hover {
+  border-color: #b9c0cf;
+}
+
+.af-input:focus {
+  border-color: var(--af-brand);
+  box-shadow: 0 0 0 4px var(--af-ring);
+}
+
+.af-input:-webkit-autofill {
+  -webkit-text-fill-color: var(--af-ink);
+  box-shadow: 0 0 0 1000px #f6f7ff inset;
+}
+
+.af-input:-webkit-autofill:focus {
+  box-shadow: 0 0 0 1000px #f6f7ff inset, 0 0 0 4px var(--af-ring);
+}
+
+.af-control:focus-within .af-control-icon {
+  color: var(--af-brand);
+}
+
+.af-field.is-invalid .af-input {
+  border-color: #f97066;
+}
+
+.af-field.is-invalid .af-input:focus {
+  border-color: var(--af-danger);
+  box-shadow: 0 0 0 4px rgba(240, 68, 56, 0.14);
+}
+
+.af-field.is-invalid .af-control-icon {
+  color: var(--af-danger);
+}
+
+.af-control-end {
+  position: absolute;
+  right: 4px;
+  display: flex;
+}
+
+.af-input.is-compact ~ .af-control-end {
+  right: 2px;
+}
+
+.af-icon-btn {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 19px;
+  color: var(--af-faint);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.af-icon-btn:hover {
+  color: var(--af-ink-2);
+  background: var(--af-subtle);
+}
+
+.af-icon-btn:focus-visible {
+  outline: 2px solid var(--af-brand);
+  outline-offset: -2px;
+}
+
+.af-icon-btn.is-danger:hover {
+  color: var(--af-danger);
+  background: var(--af-danger-soft);
+}
+
+.af-icon-btn.is-danger:focus-visible {
+  outline-color: var(--af-danger);
+}
+
+.af-icon-btn.is-bordered {
+  width: 40px;
+  height: 40px;
+  font-size: 21px;
+  color: var(--af-ink-2);
+  background: #fff;
+  border: 1px solid var(--af-line-strong);
+  border-radius: var(--af-radius);
+  box-shadow: var(--af-shadow-xs);
+}
+
+.af-icon-btn.is-bordered:hover {
+  background: #fafbfd;
+  border-color: #b9c0cf;
+}
+
+.af-error,
+.af-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.af-error {
+  color: var(--af-danger);
+  animation: af-fade 0.2s ease both;
+}
+
+.af-hint {
+  color: var(--af-faint);
+}
+
+.af-msg-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  margin-top: 1px;
+  font-size: 15px;
+}
+
+/* Checkbox */
+.af-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 14px;
+  color: var(--af-ink-2);
+  cursor: pointer;
+  user-select: none;
+}
+
+.af-check input {
+  -webkit-appearance: none;
+  appearance: none;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  background: #fff;
+  border: 1px solid var(--af-line-strong);
+  border-radius: 5px;
+  box-shadow: var(--af-shadow-xs);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.af-check input::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  transform: scale(0);
+  transition: transform 0.15s var(--af-ease);
+}
+
+.af-check input:checked {
+  background: var(--af-brand);
+  border-color: var(--af-brand);
+}
+
+.af-check input:checked::after {
+  transform: scale(1);
+}
+
+.af-check input:focus-visible {
+  outline: none;
+  border-color: var(--af-brand);
+  box-shadow: 0 0 0 4px var(--af-ring);
+}
+
+.af-check input:hover:not(:checked) {
+  border-color: #b9c0cf;
+}
+
+/* Inline helpers */
+.af-row-between {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+}
+
+.af-small {
+  font-size: 14px;
+}
+
+.af-muted {
+  color: var(--af-muted);
+}
+
+.af-center {
+  text-align: center;
+}
+
+.af-num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------
+   Links & buttons
+   --------------------------------------------------------------------- */
+
+.af-link {
+  font-weight: 550;
+  color: var(--af-brand);
+  text-decoration: none;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+
+.af-link:hover {
+  color: var(--af-brand-hover);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.af-link:focus-visible {
+  outline: 2px solid var(--af-brand);
+  outline-offset: 2px;
+}
+
+.af-link-btn {
+  padding: 0;
+  font: inherit;
+  font-weight: 550;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.af-link-btn:disabled {
+  color: var(--af-faint);
+  text-decoration: none;
+  cursor: default;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sizes: default 40px, .af-btn-lg 46px (sign-in forms), .af-btn-sm 34px */
+.af-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: var(--af-radius);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease,
+    border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+.af-btn-lg {
+  height: 46px;
+  padding: 0 18px;
+  font-size: 15px;
+}
+
+.af-btn-sm {
+  height: 34px;
+  padding: 0 11px;
+  font-size: 13.5px;
+  border-radius: var(--af-radius-sm);
+}
+
+.af-btn-block {
+  width: 100%;
+}
+
+.af-btn-primary {
+  color: #fff;
+  background: linear-gradient(180deg, #5b54f0 0%, #4338ca 100%);
+  border-color: #3f37c3;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.14), 0 6px 16px -4px rgba(79, 70, 229, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.af-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #645df3 0%, #4a40d8 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(16, 24, 40, 0.14), 0 12px 24px -8px rgba(79, 70, 229, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.af-btn-secondary {
+  color: var(--af-ink-2);
+  background: #fff;
+  border-color: var(--af-line-strong);
+  box-shadow: var(--af-shadow-xs);
+}
+
+.af-btn-secondary:hover:not(:disabled) {
+  color: var(--af-ink);
+  background: #fafbfd;
+  border-color: #b9c0cf;
+}
+
+.af-btn-ghost {
+  color: var(--af-muted);
+  background: transparent;
+}
+
+.af-btn-ghost:hover:not(:disabled) {
+  color: var(--af-ink);
+  background: var(--af-subtle);
+}
+
+.af-btn-danger {
+  color: #fff;
+  background: linear-gradient(180deg, #d92d20 0%, #b42318 100%);
+  border-color: #a51f14;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.14), 0 6px 16px -4px rgba(217, 45, 32, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.af-btn-danger:hover:not(:disabled) {
+  background: linear-gradient(180deg, #e03a2d 0%, #bd281c 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(16, 24, 40, 0.14), 0 12px 24px -8px rgba(217, 45, 32, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.af-btn-primary:active:not(:disabled),
+.af-btn-danger:active:not(:disabled) {
+  transform: translateY(0) scale(0.99);
+}
+
+.af-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--af-ring), 0 1px 2px rgba(16, 24, 40, 0.14);
+}
+
+.af-btn-danger:focus-visible {
+  box-shadow: 0 0 0 4px rgba(240, 68, 56, 0.24), 0 1px 2px rgba(16, 24, 40, 0.14);
+}
+
+.af-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.af-btn[aria-busy='true'] {
+  cursor: progress;
+  opacity: 0.92;
+}
+
+.af-btn-icon {
+  display: flex;
+  font-size: 18px;
+  transition: transform 0.2s var(--af-ease);
+}
+
+/* A trailing arrow nudges forward on hover */
+.af-btn:hover:not(:disabled) .af-btn-icon.is-trailing {
+  transform: translateX(3px);
+}
+
+.af-spinner {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: af-spin 0.7s linear infinite;
+}
+
+.af-btn-secondary .af-spinner,
+.af-btn-ghost .af-spinner {
+  border-color: rgba(43, 51, 70, 0.2);
+  border-top-color: var(--af-ink-2);
+}
+
+/* ---------------------------------------------------------------------
+   Alerts
+   --------------------------------------------------------------------- */
+
+.af-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.45;
+  border: 1px solid;
+  border-radius: var(--af-radius);
+  animation: af-rise 0.3s var(--af-ease) both;
+}
+
+.af-alert-icon {
+  display: flex;
+  flex-shrink: 0;
+  margin-top: 1px;
+  font-size: 18px;
+}
+
+.af-alert-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.af-alert-action {
+  flex-shrink: 0;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.af-alert-action:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.af-alert.tone-error {
+  color: var(--af-danger-strong);
+  background: var(--af-danger-soft);
+  border-color: var(--af-danger-line);
+}
+
+.af-alert.tone-success {
+  color: var(--af-success-strong);
+  background: var(--af-success-soft);
+  border-color: var(--af-success-line);
+}
+
+.af-alert.tone-info {
+  color: var(--af-brand-ink);
+  background: #f5f6ff;
+  border-color: #dfe2ff;
+}
+
+/* ---------------------------------------------------------------------
+   Cards
+   --------------------------------------------------------------------- */
+
+.af-card {
+  min-width: 0;
+  background: #fff;
+  border: 1px solid var(--af-line);
+  border-radius: var(--af-radius-lg);
+  box-shadow: var(--af-shadow-sm);
+}
+
+.af-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  padding: 18px 20px;
+}
+
+.af-card-title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.35;
+  font-weight: 650;
+  letter-spacing: -0.012em;
+  color: var(--af-ink);
+}
+
+.af-card-title:focus {
+  outline: none;
+}
+
+.af-card-title:focus-visible {
+  outline: 2px solid var(--af-brand);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.af-card-foot {
+  padding: 12px 20px;
+  font-size: 13px;
+  color: var(--af-muted);
+  border-top: 1px solid var(--af-line);
+}
+
+/* Stat tile: label, one headline figure, optional context line */
+.af-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+}
+
+.af-stat-label {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 550;
+  color: var(--af-muted);
+}
+
+.af-stat-value {
+  margin: 4px 0 0;
+  min-height: 38px;
+  font-size: 34px;
+  line-height: 38px;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  color: var(--af-ink);
+}
+
+.af-stat-value .af-skeleton {
+  display: inline-block;
+  width: 64px;
+  height: 28px;
+  vertical-align: middle;
+}
+
+.af-stat-none {
+  font-weight: 500;
+  color: var(--af-placeholder);
+}
+
+.af-stat-meta {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--af-muted);
+}
+
+/* ---------------------------------------------------------------------
+   Badges & avatars
+   --------------------------------------------------------------------- */
+
+.af-badge {
+  display: inline-block;
+  max-width: 100%;
+  padding: 3px 9px;
+  overflow: hidden;
+  font-size: 12.5px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--af-brand-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+  background: var(--af-brand-soft);
+  border: 1px solid var(--af-brand-line);
+  border-radius: 999px;
+}
+
+.af-badge.tone-neutral {
+  color: var(--af-muted);
+  background: var(--af-subtle);
+  border-color: var(--af-line);
+}
+
+.af-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  font-size: 12.5px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--af-brand-ink);
+  background: var(--af-brand-soft);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(79, 70, 229, 0.16);
+  user-select: none;
+}
+
+/* Hues borrowed from the sign-in artwork (indigo, sky, violet) */
+.af-avatar.hue-2 {
+  color: #075985;
+  background: #e0f2fe;
+  box-shadow: inset 0 0 0 1px rgba(2, 132, 199, 0.18);
+}
+
+.af-avatar.hue-3 {
+  color: #6b21a8;
+  background: #f3e8ff;
+  box-shadow: inset 0 0 0 1px rgba(147, 51, 234, 0.18);
+}
+
+.af-avatar.is-solid {
+  color: #fff;
+  background: linear-gradient(135deg, #818cf8, #4f46e5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* ---------------------------------------------------------------------
+   Tables
+   --------------------------------------------------------------------- */
+
+.af-table-wrap {
+  overflow-x: auto;
+}
+
+.af-table {
+  width: 100%;
+  font-size: 14px;
+  border-spacing: 0;
+  border-collapse: separate;
+}
+
+.af-table th {
+  padding: 10px 16px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--af-muted);
+  text-align: left;
+  white-space: nowrap;
+  background: #fafbfd;
+  border-top: 1px solid var(--af-line);
+  border-bottom: 1px solid var(--af-line);
+}
+
+.af-table td {
+  padding: 12px 16px;
+  color: var(--af-ink-2);
+  vertical-align: middle;
+  border-bottom: 1px solid var(--af-line);
+}
+
+.af-table th:first-child,
+.af-table td:first-child {
+  padding-left: 20px;
+}
+
+.af-table th:last-child,
+.af-table td:last-child {
+  padding-right: 20px;
+}
+
+.af-table tbody tr {
+  transition: background-color 0.12s ease;
+}
+
+.af-table tbody tr:hover {
+  background: #fafbff;
+}
+
+.af-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.af-table .af-icon-btn {
+  color: var(--af-muted);
+}
+
+/* ---------------------------------------------------------------------
+   Empty states & skeletons
+   --------------------------------------------------------------------- */
+
+.af-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 24px 52px;
+  text-align: center;
+  animation: af-fade 0.3s ease both;
+}
+
+.af-empty .af-badge-icon {
+  margin-bottom: 16px;
+}
+
+.af-empty-title {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.012em;
+  color: var(--af-ink);
+}
+
+.af-empty-text {
+  max-width: 380px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--af-muted);
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.af-empty-action {
+  margin-top: 20px;
+}
+
+.af-skeleton {
+  display: block;
+  height: 12px;
+  background: linear-gradient(90deg, #eceef4 25%, #f6f7fa 37%, #eceef4 63%);
+  background-size: 400% 100%;
+  border-radius: 6px;
+  animation: af-shimmer 1.4s ease infinite;
+}
+
+/* ---------------------------------------------------------------------
+   Dialog (native <dialog>, opened with showModal)
+   --------------------------------------------------------------------- */
+
+.af-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  width: min(calc(100vw - 32px), 480px);
+  max-width: none;
+  height: fit-content;
+  margin: auto;
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  overflow: hidden;
+  color: var(--af-ink);
+  background: #fff;
+  border: 0;
+  border-radius: 20px;
+  box-shadow: var(--af-shadow-lg);
+}
+
+.af-dialog.is-sm {
+  width: min(calc(100vw - 32px), 420px);
+}
+
+.af-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  animation: af-dialog-in 0.28s var(--af-ease) both;
+}
+
+.af-dialog::backdrop {
+  background: var(--af-scrim);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  animation: af-fade 0.2s ease both;
+}
+
+@keyframes af-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+
+.af-dialog-panel,
+.af-dialog-form {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.af-dialog-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 22px 22px 0;
+}
+
+.af-dialog-heading {
+  flex: 1;
+  min-width: 0;
+  padding-top: 1px;
+}
+
+.af-dialog-title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 650;
+  letter-spacing: -0.018em;
+  color: var(--af-ink);
+}
+
+.af-dialog-desc {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--af-muted);
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.af-dialog-desc strong {
+  font-weight: 600;
+  color: var(--af-ink-2);
+}
+
+.af-dialog-close {
+  margin: -6px -8px 0 0;
+}
+
+.af-dialog-body {
+  flex: 1;
+  min-height: 0;
+  padding: 20px 22px 22px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.af-dialog-foot {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 22px;
+  background: #fafbfd;
+  border-top: 1px solid var(--af-line);
+}
+
+/* A dialog with no body (a plain confirmation) still needs air above its buttons */
+.af-dialog-head + .af-dialog-foot {
+  margin-top: 22px;
+}
+
+/* ---------------------------------------------------------------------
+   Toasts
+   --------------------------------------------------------------------- */
+
+.af-toasts {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.af-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 240px;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 10px 10px 10px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #fff;
+  background: linear-gradient(160deg, var(--af-navy-2) 0%, var(--af-navy-1) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  box-shadow: 0 24px 48px -12px rgba(2, 6, 23, 0.5);
+  pointer-events: auto;
+  animation: af-rise 0.35s var(--af-ease) both;
+}
+
+.af-toast-icon {
+  display: flex;
+  flex-shrink: 0;
+  font-size: 19px;
+  color: #6ee7b7;
+}
+
+.af-toast.tone-error .af-toast-icon {
+  color: #fda29b;
+}
+
+.af-toast-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.af-toast-close {
+  width: 30px;
+  height: 30px;
+  font-size: 17px;
+  color: var(--af-on-navy);
+}
+
+.af-toast-close:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.af-toast-close:focus-visible {
+  outline-color: #a5b4fc;
+}
+
+/* ---------------------------------------------------------------------
+   Responsive & input devices
+   --------------------------------------------------------------------- */
+
+/* iOS zooms the page when a focused field uses text smaller than 16px */
+@media (pointer: coarse) {
+  .af-input,
+  .af-input.is-compact {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .af-toasts {
+    right: 16px;
+    bottom: 16px;
+    left: 16px;
+    align-items: stretch;
+  }
+
+  .af-toast {
+    max-width: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .af-stat {
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .af-stat-value {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .af-row-2 {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .af-dialog,
+  .af-dialog.is-sm {
+    width: calc(100vw - 24px);
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
+    border-radius: 18px;
+  }
+
+  .af-dialog-head {
+    padding: 18px 18px 0;
+  }
+
+  .af-dialog-body {
+    padding: 18px;
+  }
+
+  .af-dialog-foot {
+    flex-direction: column-reverse;
+    padding: 14px 18px;
+  }
+
+  .af-dialog-foot .af-btn {
+    width: 100%;
+  }
+}

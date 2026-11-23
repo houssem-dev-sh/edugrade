@@ -12,14 +12,26 @@ public class EmailService {
     private JavaMailSender mailSender;
 
     public void sendOtpEmail(String toEmail, String otp) {
+        send(toEmail,
+            "🔐 StudentOps — Votre code de vérification",
+            "Code de vérification", otp);
+    }
+
+    public void sendPasswordResetEmail(String toEmail, String code) {
+        send(toEmail,
+            "🔑 StudentOps — Réinitialisation du mot de passe",
+            "Réinitialisation du mot de passe", code);
+    }
+
+    private void send(String toEmail, String subject,
+                      String title, String code) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper =
                 new MimeMessageHelper(message, true, "UTF-8");
             helper.setTo(toEmail);
-            helper.setSubject(
-                "🔐 StudentOps — Votre code de vérification");
-            helper.setText(buildEmailContent(otp), true);
+            helper.setSubject(subject);
+            helper.setText(buildEmailContent(title, code), true);
             mailSender.send(message);
         } catch (Exception e) {
             throw new RuntimeException(
@@ -27,7 +39,7 @@ public class EmailService {
         }
     }
 
-    private String buildEmailContent(String otp) {
+    private String buildEmailContent(String title, String otp) {
         return """
             <html>
             <body style="font-family:Arial,sans-serif;padding:20px;">
@@ -38,7 +50,7 @@ public class EmailService {
                 <div style="padding:30px;border:1px solid #ddd;
                     border-radius:10px;margin-top:20px;">
                     <h2 style="color:#1f497d;">
-                        Code de vérification
+                        %s
                     </h2>
                     <p>Voici votre code OTP :</p>
                     <div style="background:#f5f5f5;padding:20px;
@@ -54,7 +66,7 @@ public class EmailService {
                 </div>
             </body>
             </html>
-            """.formatted(otp);
+            """.formatted(title, otp);
     }
 }
 
