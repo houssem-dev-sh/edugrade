@@ -19,11 +19,17 @@ public class AuthController {
     public ResponseEntity<?> login(
             @RequestBody Map<String, String> req) {
         try {
-            String msg = authService.loginStep1(
+            AuthService.LoginStart result = authService.loginStep1(
                 req.get("email"), req.get("password"));
+            // A token here means the account skips the email code.
+            if (result.token() != null)
+                return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "token", result.token(),
+                    "message", result.message()));
             return ResponseEntity.ok(Map.of(
                 "success", true,
-                "message", msg));
+                "message", result.message()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of(
                 "success", false,

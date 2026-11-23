@@ -52,6 +52,12 @@ const Login = () => {
     setLoading(true);
     try {
       const data = await authApi.login(email, values.password);
+      if (data.success && data.token) {
+        // Account without two-step verification: signed in directly.
+        saveSession(data.token, email, remember);
+        window.location.href = '/dashboard';
+        return;
+      }
       if (data.success) {
         setOtp('');
         setInfo('');

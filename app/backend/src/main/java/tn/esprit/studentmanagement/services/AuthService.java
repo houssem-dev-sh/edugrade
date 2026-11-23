@@ -17,7 +17,10 @@ public class AuthService {
     @Autowired private JwtService jwtService;
     @Autowired private PasswordEncoder passwordEncoder;
 
-    public String loginStep1(String email, String password) {
+    /** Result of the first login step: a JWT when no code is needed, otherwise null. */
+    public record LoginStart(String token, String message) {}
+
+    public LoginStart loginStep1(String email, String password) {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException(
                 "Email ou mot de passe incorrect"));
@@ -27,9 +30,14 @@ public class AuthService {
             throw new RuntimeException(
                 "Email ou mot de passe incorrect");
 
+        if (!user.isTwoFactorEnabled())
+            return new LoginStart(
+                jwtService.generateToken(email, user.getRole()),
+                "Connexion réussie !");
+
         String otp = otpService.generateOtp(email);
         emailService.sendOtpEmail(email, otp);
-        return "Code OTP envoyé sur " + email;
+        return new LoginStart(null, "Code OTP envoyé sur " + email);
     }
 
     public String loginStep2(String email, String otp) {
@@ -49,9 +57,14 @@ public class AuthService {
         if (userRepository.existsByEmail(user.getEmail()))
             throw new RuntimeException("Email déjà utilisé");
 
+        // Only email, password and names come from the client: never trust an id
+        // (would overwrite another row) or a two-factor / enabled flag from the request.
+        user.setId(null);
         user.setPassword(
             passwordEncoder.encode(user.getPassword()));
         user.setRole("STUDENT");
+        user.setEnabled(true);
+        user.setTwoFactorEnabled(true);
         userRepository.save(user);
         return "Inscription réussie !";
     }
