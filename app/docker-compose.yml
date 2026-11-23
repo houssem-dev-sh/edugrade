@@ -37,6 +37,9 @@ services:
       MAIL_USERNAME: ${MAIL_USERNAME:-}
       MAIL_PASSWORD: ${MAIL_PASSWORD:-}
       JWT_SECRET: ${JWT_SECRET:-StudentOpsDefaultSecretKeyForDevOnly2024}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_TWO_FACTOR: ${ADMIN_TWO_FACTOR:-true}
     ports:
       - "8089:8089"
 

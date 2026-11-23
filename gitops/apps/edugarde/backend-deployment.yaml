@@ -21,6 +21,12 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+          # ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_TWO_FACTOR, MAIL_USERNAME, MAIL_PASSWORD, JWT_SECRET.
+          # Created by hand on the cluster (kept out of Git), like mariadb-secret.
+          envFrom:
+            - secretRef:
+                name: backend-secret
+                optional: true
           env:
             - name: SERVER_PORT
               value: "8080"
