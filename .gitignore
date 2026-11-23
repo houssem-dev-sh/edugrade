@@ -6,3 +6,5 @@
 node_modules/
 target/
 *.log
+infra/cosign
+pipeline/pipline-ci
