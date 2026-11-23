@@ -1,0 +1,36 @@
+# Kyverno : seules les images signées avec ta clé Cosign sont acceptées dans le namespace edugrade
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-image-signature
+spec:
+  webhookTimeoutSeconds: 30
+  failurePolicy: Fail
+  rules:
+    - name: verify-cosign-signature
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaces: [edugrade]
+      verifyImages:
+        - imageReferences:
+            - "docker.io/houssem26102001/student-frontend*"
+            - "docker.io/houssem26102001/student-backend*"
+          failureAction: Audit          # passer à Enforce quand tout fonctionne
+          required: true
+          mutateDigest: false           # évite que Kyverno modifie le Deployment (ArgoCD resterait OutOfSync)
+          verifyDigest: true            # l'image doit être référencée par digest
+          # Dépôts publics : aucun secret registre nécessaire.
+          # Si tu passes les dépôts en privé, ajoute :
+          #   imageRegistryCredentials:
+          #     secrets:
+          #       - regcred
+          attestors:
+            - entries:
+                - keys:
+                    publicKeys: |-
+                      -----BEGIN PUBLIC KEY-----
+                      MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE0YmVTMIdmcV9fkD86SoMXzOgSy/u
+                      GiHJ0gelrSq7htlsGg0CDJNMDoobHBcGV7v0tHS68UXbPe9vCDlRT4doGw==
+                      -----END PUBLIC KEY-----

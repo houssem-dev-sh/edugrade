@@ -4,7 +4,7 @@ metadata:
   name: frontend
   namespace: edugrade
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: edugrade
@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: docker.io/houssem26102001/student-frontend:32
+          image: docker.io/houssem26102001/student-frontend:latest
           ports:
             - name: http
               containerPort: 80
