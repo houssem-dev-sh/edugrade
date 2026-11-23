@@ -1,0 +1,51 @@
+# Lancement local de la stack complète (MariaDB + backend Spring Boot + frontend React)
+#
+#   cd app
+#   cp .env.example .env      # puis renseigner MAIL_USERNAME / MAIL_PASSWORD
+#   docker compose up --build
+#
+#   Frontend : http://localhost:3000
+#   Backend  : http://localhost:8089/student
+#   Swagger  : http://localhost:8089/student/swagger-ui/index.html
+#
+# Les noms de services "mariadb" et "backend" sont utilisés par
+# application.properties et frontend/nginx.conf : ne pas les renommer.
+
+services:
+  mariadb:
+    image: mariadb:11.4
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MARIADB_DATABASE: studentdb
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    environment:
+      DB_HOST: mariadb
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_PASSWORD:-root}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      JWT_SECRET: ${JWT_SECRET:-StudentOpsDefaultSecretKeyForDevOnly2024}
+    ports:
+      - "8089:8089"
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  mariadb-data:

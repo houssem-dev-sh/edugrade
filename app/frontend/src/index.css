@@ -1,0 +1,40 @@
+/* Global entry: design tokens, then shared UI primitives, then the page base. */
+@import './styles/tokens.css';
+@import './styles/ui.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--af-font);
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
+  line-height: 1.5;
+  color: var(--af-ink);
+  background: var(--af-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
