@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: docker.io/houssem26102001/student-frontend:50
+          image: docker.io/houssem26102001/student-frontend:latest
           ports:
             - name: http
               containerPort: 80
