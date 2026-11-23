@@ -2,6 +2,24 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Interface structure
+
+The sign-in pages and the app share one design system. Styling is plain CSS built on
+CSS variables; `@mui/icons-material` is used for icons only.
+
+| Where | What it holds |
+| --- | --- |
+| `src/styles/tokens.css` | Design tokens: colours, radius, shadows, font. Change a value here to restyle the whole product. |
+| `src/styles/ui.css` | Shared building blocks (`af-` classes): fields, buttons, alerts, cards, tables, dialogs, toasts. |
+| `src/components/ui/` | The React components for those building blocks (`Button`, `TextField`, `Dialog`, `Alert`, `StatCard`…). |
+| `src/layout/` | The app shell (`MainLayout`: sidebar, mobile menu) and `PageHeader`. |
+| `src/components/auth/` | Layout and artwork of the sign-in pages. |
+| `src/config.js` | The product name shown in the interface. |
+
+To add a page: create it in `src/pages/`, start it with `<PageHeader>`, add its route in
+`src/App.js` wrapped in `<MainLayout>` (like the dashboard), and list it in `NAV_ITEMS` in
+`src/layout/MainLayout.js` so it appears in the sidebar.
+
 ## Available Scripts
 
 In the project directory, you can run:
