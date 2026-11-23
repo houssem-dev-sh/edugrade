@@ -1,11 +1,20 @@
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 export const MIN_PASSWORD_LENGTH = 8;
+
+// Linear-time check, no backtracking regex (avoids ReDoS): exactly one "@" with
+// text before it, no whitespace, and a dot in the domain with text on both sides.
+export function isValidEmail(value) {
+  if (typeof value !== 'string' || /\s/.test(value)) return false;
+  const at = value.indexOf('@');
+  if (at < 1 || at !== value.lastIndexOf('@')) return false;
+  const domain = value.slice(at + 1);
+  const dot = domain.indexOf('.', 1);
+  return dot !== -1 && dot < domain.length - 1;
+}
 
 export function validateEmail(value) {
   const email = value.trim();
   if (!email) return 'Enter your email address.';
-  if (!EMAIL_PATTERN.test(email)) return 'Enter a valid email address, like name@school.edu.';
+  if (!isValidEmail(email)) return 'Enter a valid email address, like name@school.edu.';
   return '';
 }
 

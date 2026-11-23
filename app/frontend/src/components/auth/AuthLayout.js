@@ -5,11 +5,13 @@ import Brand from '../ui/Brand';
 import { BRAND } from '../../config';
 import './auth.css';
 
-const VISUAL_BY_PATH = {
-  '/register': 'register',
-  '/forgot-password': 'recovery',
-  '/reset-password': 'recovery',
-};
+const RECOVERY_PATHS = new Set(['/forgot-password', '/reset-password']);
+
+function visualFor(pathname) {
+  if (pathname === '/register') return 'register';
+  if (RECOVERY_PATHS.has(pathname)) return 'recovery';
+  return 'login';
+}
 
 // Shared shell for every auth route: it stays mounted while the user moves
 // between pages, so only the form animates in.
@@ -40,7 +42,7 @@ export default function AuthLayout() {
         </footer>
       </main>
 
-      <AuthVisual variant={VISUAL_BY_PATH[pathname] || 'login'} />
+      <AuthVisual variant={visualFor(pathname)} />
     </div>
   );
 }

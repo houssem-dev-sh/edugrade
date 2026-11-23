@@ -7,20 +7,20 @@ import Button from './ui/Button';
 import Alert from './ui/Alert';
 import { DialogBody, DialogFooter } from './ui/Dialog';
 import useForm from '../hooks/useForm';
+import { isValidEmail } from '../auth/validation';
 
 const EMPTY_STUDENT = { firstName: '', lastName: '', email: '', phone: '', classe: '' };
 
-// Same rules as before the redesign: first name, last name and email are required,
-// the email must look like an email, and a phone number (optional) is 8 to 15 digits.
-const EMAIL_PATTERN = /\S+@\S+\.\S+/;
-const PHONE_PATTERN = /^[0-9]{8,15}$/;
+// First name, last name and email are required, the email must look like an email,
+// and a phone number (optional) is 8 to 15 digits.
+const PHONE_PATTERN = /^\d{8,15}$/;
 
 const validators = {
   firstName: (value) => (value ? '' : 'Enter a first name.'),
   lastName: (value) => (value ? '' : 'Enter a last name.'),
   email: (value) => {
     if (!value) return 'Enter an email address.';
-    return EMAIL_PATTERN.test(value) ? '' : 'Enter a valid email address, like name@school.edu.';
+    return isValidEmail(value) ? '' : 'Enter a valid email address, like name@school.edu.';
   },
   phone: (value) =>
     value && !PHONE_PATTERN.test(value) ? 'Use 8 to 15 digits, with no spaces or symbols.' : '',
