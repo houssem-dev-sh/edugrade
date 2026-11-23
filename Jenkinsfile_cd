@@ -1,0 +1,83 @@
+pipeline {
+    agent any
+
+    options {
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timeout(time: 15, unit: 'MINUTES')
+    }
+
+    parameters {
+        string(
+            name: 'IMAGE_TAG',
+            defaultValue: 'latest',
+            description: 'Tag Docker Hub à déployer'
+        )
+    }
+
+    environment {
+        GITOPS_REPO = 'https://github.com/houssem-dev-sh/edugrade.git'
+        GITOPS_BRANCH = 'main'
+        BACKEND_IMAGE = 'docker.io/houssem26102001/student-backend'
+        FRONTEND_IMAGE = 'docker.io/houssem26102001/student-frontend'
+    }
+
+    stages {
+        stage('Checkout GitOps') {
+            steps {
+                cleanWs()
+                git branch: "${GITOPS_BRANCH}",
+                    credentialsId: 'github-crds',
+                    url: "${GITOPS_REPO}"
+            }
+        }
+
+        stage('Update image tags') {
+            steps {
+                sh '''
+                    sed -i \
+                      "s#docker.io/houssem26102001/student-backend:[^\\" ]*#${BACKEND_IMAGE}:${IMAGE_TAG}#g" \
+                      gitops/apps/edugarde/backend-deployment.yaml
+
+                    sed -i \
+                      "s#docker.io/houssem26102001/student-frontend:[^\\" ]*#${FRONTEND_IMAGE}:${IMAGE_TAG}#g" \
+                      gitops/apps/edugarde/frontend-deployment.yaml
+
+                    echo "── Modifications ──"
+                    git diff --stat
+                    git diff
+                '''
+            }
+        }
+
+        stage('Commit and push') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'github-crds',
+                        usernameVariable: 'GIT_USER',
+                        passwordVariable: 'GIT_TOKEN'
+                    )
+                ]) {
+                    sh '''
+                        git config user.name "jenkins-cd"
+                        git config user.email "jenkins-cd@example.com"
+
+                        git add gitops/apps/edugarde/backend-deployment.yaml \
+                                gitops/apps/edugarde/frontend-deployment.yaml
+
+                        if git diff --cached --quiet; then
+                            echo "Aucun changement à déployer."
+                            exit 0
+                        fi
+
+                        git commit -m "cd: deploy images ${IMAGE_TAG}"
+
+                        git push \
+                          https://${GIT_USER}:${GIT_TOKEN}@github.com/houssem-dev-sh/edugrade.git main
+                    '''
+                }
+            }
+        }
+    }
+}
